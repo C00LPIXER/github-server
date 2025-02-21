@@ -1,4 +1,4 @@
-name: Setup SSH Server on GitHub Runner
+name: SSH Server on GitHub Runner
 
 on:
   workflow_dispatch:  # Allows manual trigger from GitHub Actions UI
@@ -26,6 +26,7 @@ jobs:
             cat ~/.ssh/github-actions-key
             echo "Generated SSH public key:"
             cat ~/.ssh/github-actions-key.pub
+          fi  # **FIXED: Properly closed the if statement**
 
           cat ~/.ssh/github-actions-key.pub >> ~/.ssh/authorized_keys
           chmod 600 ~/.ssh/authorized_keys
