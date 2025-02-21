@@ -5,15 +5,17 @@ on:
 
 jobs:
   setup-server:
-    runs-on: ubuntu-latest  # GitHub-hosted runner
+    runs-on: ubuntu-latest  # GitHub-hosted runner (temporary server)
 
     steps:
       - name: Generate SSH Key
         run: |
           ssh-keygen -t rsa -b 4096 -C "github-actions" -f server-key -N ""
-          mkdir -p ~/.ssh  # Ensure the .ssh directory exists
+          mkdir -p ~/.ssh  # Create the SSH directory
+          chmod 700 ~/.ssh  # Set correct permissions
+          touch ~/.ssh/authorized_keys  # Ensure the file exists
+          chmod 600 ~/.ssh/authorized_keys  # Set correct permissions
           cat server-key.pub >> ~/.ssh/authorized_keys
-          chmod 600 ~/.ssh/authorized_keys
 
       - name: Start SSH Server
         run: |
