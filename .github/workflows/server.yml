@@ -5,12 +5,13 @@ on:
 
 jobs:
   setup-server:
-    runs-on: ubuntu-latest  # GitHub-hosted runner (acts as a temporary server)
+    runs-on: ubuntu-latest  # GitHub-hosted runner
 
     steps:
       - name: Generate SSH Key
         run: |
           ssh-keygen -t rsa -b 4096 -C "github-actions" -f server-key -N ""
+          mkdir -p ~/.ssh  # Ensure the .ssh directory exists
           cat server-key.pub >> ~/.ssh/authorized_keys
           chmod 600 ~/.ssh/authorized_keys
 
@@ -28,3 +29,6 @@ jobs:
           cat server-key.pub
           echo "Private Key (Save this for future use):"
           cat server-key
+
+      - name: Get Public IP
+        run: curl ifconfig.me
