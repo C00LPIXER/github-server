@@ -1,0 +1,30 @@
+name: GitHub Actions Server
+
+on:
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  setup-server:
+    runs-on: ubuntu-latest  # GitHub-hosted runner (acts as a temporary server)
+
+    steps:
+      - name: Generate SSH Key
+        run: |
+          ssh-keygen -t rsa -b 4096 -C "github-actions" -f server-key -N ""
+          cat server-key.pub >> ~/.ssh/authorized_keys
+          chmod 600 ~/.ssh/authorized_keys
+
+      - name: Start SSH Server
+        run: |
+          sudo apt update && sudo apt install -y openssh-server
+          sudo systemctl enable ssh
+          sudo systemctl start ssh
+          sudo ufw allow OpenSSH
+
+      - name: Print Connection Details
+        run: |
+          echo "Temporary GitHub Actions Server is running!"
+          echo "Public Key (Save this for future use):"
+          cat server-key.pub
+          echo "Private Key (Save this for future use):"
+          cat server-key
