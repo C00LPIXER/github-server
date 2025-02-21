@@ -1,4 +1,4 @@
-name: SSH Server on GitHub Runner
+name: Setup SSH Server on GitHub Runner
 
 on:
   workflow_dispatch:  # Allows manual trigger from GitHub Actions UI
@@ -48,4 +48,4 @@ jobs:
       - name: Keep Runner Alive
         run: |
           echo "SSH Server is running. Use the command above to connect."
-          sleep 1h
+          sleep 3600  # Keeps the runner alive for 1 hour
