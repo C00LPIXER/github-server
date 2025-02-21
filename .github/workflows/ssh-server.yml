@@ -1,0 +1,51 @@
+name: SSH Server on GitHub Runner
+
+on:
+  workflow_dispatch:  # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  setup-runner:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          
+          if [[ -n "${{ secrets.SSH_PRIVATE_KEY }}" ]]; then
+            echo "Using existing SSH key from secrets..."
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions-key
+            chmod 600 ~/.ssh/github-actions-key
+          else
+            echo "Generating new SSH key..."
+            ssh-keygen -t rsa -b 4096 -C "github-actions" -f ~/.ssh/github-actions-key -N ""
+            echo "Generated SSH private key:"
+            cat ~/.ssh/github-actions-key
+            echo "Generated SSH public key:"
+            cat ~/.ssh/github-actions-key.pub
+
+          cat ~/.ssh/github-actions-key.pub >> ~/.ssh/authorized_keys
+          chmod 600 ~/.ssh/authorized_keys
+
+      - name: Install and Start SSH Server
+        run: |
+          sudo apt update
+          sudo apt install -y openssh-server
+          sudo systemctl enable ssh
+          sudo systemctl start ssh
+          sudo ufw allow 22
+
+      - name: Get Public IP
+        run: |
+          PUBLIC_IP=$(curl -s http://checkip.amazonaws.com)
+          echo "Connect using the following command:"
+          echo "ssh -i ~/.ssh/github-actions-key runner@${PUBLIC_IP}"
+          echo "PUBLIC_IP=${PUBLIC_IP}" >> $GITHUB_ENV
+
+      - name: Keep Runner Alive
+        run: |
+          echo "SSH Server is running. Use the command above to connect."
+          sleep 1h
